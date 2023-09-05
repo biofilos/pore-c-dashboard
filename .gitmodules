@@ -1,0 +1,3 @@
+[submodule "HiPore-C"]
+	path = HiPore-C
+	url = https://github.com/zhengdafangyuan/HiPore-C.git
