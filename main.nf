@@ -9,11 +9,14 @@ params.cpu = 24
 
 include { enzDigest } from "./modules/utils.nf"
 include {align} from "./modules/alignment.nf"
+include {ann} from "./modules/annotation.nf"
 
 workflow {
     enzDigest([params.enz, file(params.chrom_sizes), file(params.genome)])
     Channel.fromPath(params.fq).set{fqs}
     align(fqs)
+    ann(fqs, enzDigest.out, align.out)
+    
 
 }
 

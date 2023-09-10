@@ -61,7 +61,7 @@ process unaligned {
   """
   awk '{print \$1}' ${paf} | sort | uniq > ${paf.baseName}.aligned.txt
   comm ${readlist} ${paf.baseName}.aligned.txt -3 | awk '{print \$1}' > unaligned.txt
-  seqkit subseq ${fq} unaligned.txt > ${paf.baseName}.unaligned.fq
+  seqtk subseq ${fq} unaligned.txt > ${paf.baseName}.unaligned.fq
   """
 }
 
