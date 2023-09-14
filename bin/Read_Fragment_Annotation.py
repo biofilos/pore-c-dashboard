@@ -84,7 +84,8 @@ def FindReads_GenomeFragments(rp_df, gp_df, tailtag="start", distance_thred=10):
 # Multi paralllel running
 def parallel_run(read_dict, Genome_vd_dict, func, tailtag="start",  cpus=1, distance_thred=10):
     #reads_vdF_df = Parallel(n_jobs=cpus)( delayed(func)(rp_df, Genome_vd_dict[gkey[0]], tailtag, distance_thred) for gkey, rp_df in read_dict.items() )
-    reads_vdF_df = Parallel(n_jobs=cpus)( delayed(func)(rp_df, Genome_vd_dict[ gkey[0] ], tailtag, distance_thred) for gkey, rp_df in read_dict )
+    # JFO: I added the condition to check that the key is in the Genome_vd_dict
+    reads_vdF_df = Parallel(n_jobs=cpus)( delayed(func)(rp_df, Genome_vd_dict[ gkey[0] ], tailtag, distance_thred) for gkey, rp_df in read_dict if gkey[0] in Genome_vd_dict.keys() )
     return (pd.concat(reads_vdF_df) )
 
 # reads virtual digestion Fragment Positioning
@@ -446,6 +447,7 @@ def ReadsvdFAnnotation(RvdF_DF, GetFragmentDFValue = GetFragmentDFValue ):
     return(Fragref_DF)
 
 # Initiation Parameter
+# JFO: made threads a parameter
 InputParaDic = {"Rawfq" :sys.argv[1],
                 "paffile" :sys.argv[2],
                 "workdir" : sys.argv[3],
@@ -457,7 +459,7 @@ InputParaDic = {"Rawfq" :sys.argv[1],
                 "remap_paf":"minimap2_subreads_realign.paf",
                 "subreadbed" : "subreads.bed",
                 "Nsplit" : 10,
-                "pthreads" : 5,
+                "pthreads" : sys.argv[9],
                 "Merge_distance_thred" : 50,
                 "gap_distance_thred" : 30,
                 "overlap_distance_thred" : 50,
@@ -465,7 +467,7 @@ InputParaDic = {"Rawfq" :sys.argv[1],
                 "Position_distance_thred" : 30, 
                 "tail_distance_thred" : 50,
                 "replace_thred" : 0.95,
-                "threads": 5}
+                "threads": sys.argv[9]}
 
 os.system( "mkdir -p %s"%InputParaDic["workdir"] )
 os.chdir(InputParaDic["workdir"])

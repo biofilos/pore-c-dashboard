@@ -7,18 +7,18 @@ workflow align {
     ngmlr(fastq) | samToPaf
     unaligned(fastq, samToPaf.out, readlist.out)
     minimap2(fastq)
-    mergePaf(ngmlr.out, minimap2.out)
+    mergePaf(samToPaf.out, minimap2.out)
   emit:
     mergePaf.out
-
 }
 
 process readlist {
+  conda "seqkit"
   cpus 1
   input:
     path fastq
   output:
-    path 'readlist.txt'
+    path('readlist.txt')
   script:
   """
   seqkit fx2tab ${fastq} -i -n -l | awk '{print \$1}' | sort > readlist.txt
@@ -26,6 +26,7 @@ process readlist {
 }
 
 process ngmlr {
+  conda "ngmlr"
   cpus params.cpu
   input:
     path(fastq)
@@ -38,6 +39,7 @@ process ngmlr {
 }
 
 process samToPaf {
+  conda "minimap2"
   cpus 1
   input:
     path(sam)
@@ -50,6 +52,7 @@ process samToPaf {
 }
 
 process unaligned {
+  conda "seqtk"
   cpus 1
   input:
     path(fq)
@@ -66,6 +69,7 @@ process unaligned {
 }
 
 process minimap2 {
+  conda "minimap2"
   cpus params.cpu
   input:
     path(fastq)
@@ -83,10 +87,10 @@ process mergePaf {
     path(ngmlr_paf)
     path(minimap2_paf)
   output:
-    path("${ngmlr_paf.baseName}.reads_map.paf")
+    path("${ngmlr_paf.baseName.replace(".fastq.ngmlr", "")}.paf")
   script:
   """
-  awk -v OFS="\t" '(\$12>0){print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,\$9,\$10,\$11,\$12,\$17}' ${ngmlr_paf}  > ${ngmlr_paf.baseName}.reads_map.paf
-  awk -v OFS="\t" '(\$12>0){print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,\$9,\$10,\$11,\$12,\$22}' ${minimap2_paf} >> ${ngmlr_paf.baseName}.reads_map.paf
+  awk -v OFS="\t" '(\$12>0){print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,\$9,\$10,\$11,\$12,\$17}' ${ngmlr_paf}  > ${ngmlr_paf.baseName.replace(".fastq.ngmlr", "")}.paf
+  awk -v OFS="\t" '(\$12>0){print \$1,\$2,\$3,\$4,\$5,\$6,\$7,\$8,\$9,\$10,\$11,\$12,\$22}' ${minimap2_paf} >> ${ngmlr_paf.baseName.replace(".fastq.ngmlr", "")}.paf
   """
 }
